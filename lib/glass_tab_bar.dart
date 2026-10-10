@@ -19,6 +19,8 @@ class GlassTabBar extends StatefulWidget {
     required this.currentIndex,
     required this.onChanged,
     required this.settingsSelected,
+    required this.fillAlpha,
+    required this.vibrationEnabled,
     required this.onSettingsPressed,
     super.key,
   })  : assert(items.length > 0),
@@ -28,6 +30,8 @@ class GlassTabBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onChanged;
   final bool settingsSelected;
+  final int fillAlpha;
+  final bool vibrationEnabled;
   final VoidCallback onSettingsPressed;
 
   @override
@@ -56,7 +60,7 @@ class _GlassTabBarState extends State<GlassTabBar> {
 
     _localIndex = index;
     _localSettingsSelected = false;
-    HapticFeedback.selectionClick();
+    if (widget.vibrationEnabled) HapticFeedback.selectionClick();
     widget.onChanged(index);
   }
 
@@ -91,7 +95,7 @@ class _GlassTabBarState extends State<GlassTabBar> {
   void _openSettings() {
     if (_localSettingsSelected) return;
     _localSettingsSelected = true;
-    HapticFeedback.selectionClick();
+    if (widget.vibrationEnabled) HapticFeedback.selectionClick();
     widget.onSettingsPressed();
   }
 
@@ -124,7 +128,12 @@ class _GlassTabBarState extends State<GlassTabBar> {
                       filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0x40262628),
+                          color: Color.fromARGB(
+                            widget.fillAlpha,
+                            0x26,
+                            0x26,
+                            0x28,
+                          ),
                           borderRadius: BorderRadius.circular(_radius),
                           border: Border.all(
                             color: const Color(0x33FFFFFF),
@@ -178,6 +187,7 @@ class _GlassTabBarState extends State<GlassTabBar> {
           const SizedBox(width: 10),
           _GlassSettingsButton(
             selected: widget.settingsSelected,
+            fillAlpha: widget.fillAlpha,
             onPressed: _openSettings,
           ),
         ],
@@ -189,10 +199,12 @@ class _GlassTabBarState extends State<GlassTabBar> {
 class _GlassSettingsButton extends StatelessWidget {
   const _GlassSettingsButton({
     required this.selected,
+    required this.fillAlpha,
     required this.onPressed,
   });
 
   final bool selected;
+  final int fillAlpha;
   final VoidCallback onPressed;
 
   @override
@@ -206,7 +218,7 @@ class _GlassSettingsButton extends StatelessWidget {
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: onPressed,
-            color: const Color(0x40262628),
+            color: Color.fromARGB(fillAlpha, 0x26, 0x26, 0x28),
             borderRadius: BorderRadius.circular(26),
             child: Container(
               width: 52,

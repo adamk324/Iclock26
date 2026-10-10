@@ -32,14 +32,13 @@ jobs:
       - name: Generate iOS project
         run: flutter create --platforms=ios --no-pub .
 
-      - name: Set iOS 15 deployment target, app name, and icon
+      - name: Generate iOS app icons
+        run: dart run flutter_launcher_icons
+
+      - name: Set iOS 15 deployment target, app name, and bundle identifiers
         run: |
-          mkdir -p ios/Runner/Assets.xcassets/AppIcon.appiconset
-          sips -s format png -z 1024 1024 AppIcon.jpg \
-            --out ios/Runner/Assets.xcassets/AppIcon.appiconset/AppIcon.png
           python3 - <<'PY'
           from pathlib import Path
-          import json
           import plistlib
           import re
 
@@ -51,18 +50,23 @@ jobs:
           )
           if project_count == 0:
               raise SystemExit("Could not find the iOS deployment target in the Xcode project")
-          project.write_text(project_text)
 
-          icon_set = Path("ios/Runner/Assets.xcassets/AppIcon.appiconset")
-          contents_path = icon_set / "Contents.json"
-          contents = json.loads(contents_path.read_text())
-          contents["images"] = [{
-              "filename": "AppIcon.png",
-              "idiom": "universal",
-              "platform": "ios",
-              "size": "1024x1024",
-          }]
-          contents_path.write_text(json.dumps(contents, indent=2) + "\n")
+          bundle_pattern = r"com\.example\.[A-Za-z0-9_]+(\.RunnerTests)?"
+          bundle_ids = list(re.finditer(bundle_pattern, project_text))
+          runner_ids = [match for match in bundle_ids if match.group(1) is None]
+          test_ids = [match for match in bundle_ids if match.group(1) is not None]
+          if len(runner_ids) < 3 or not test_ids:
+              raise SystemExit(
+                  "Expected Runner Debug/Release/Profile and RunnerTests bundle identifiers"
+              )
+          project_text = re.sub(
+              bundle_pattern,
+              lambda match: "com.mint.clock" + (match.group(1) or ""),
+              project_text,
+          )
+          if "com.example" in project_text:
+              raise SystemExit("An example bundle identifier remains in the Xcode project")
+          project.write_text(project_text)
 
           info_plist = Path("ios/Runner/Info.plist")
           with info_plist.open("rb") as source:

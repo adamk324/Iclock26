@@ -2,6 +2,8 @@
 
 A lightweight, dark Cupertino clock app built with Flutter.
 
+Settings for glass transparency and haptics are saved between launches.
+
 ## Run
 
 ```sh
@@ -19,3 +21,5 @@ the app as `Runner.ipa`, with `Payload/Runner.app` at the archive root. Download
 and extract the `ios-15-iphone-se-unsigned-ipa` artifact from a successful
 workflow run to get the IPA file. The IPA is unsigned; installing it through
 normal iOS distribution requires signing with an Apple developer certificate.
+The generated Runner and RunnerTests targets use `com.mint.clock` and
+`com.mint.clock.RunnerTests`.
