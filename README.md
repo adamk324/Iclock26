@@ -1,61 +1,43 @@
 # Clock*
 
-A lightweight Cupertino-style clock app inspired by the iOS Clock app, with
-support for iOS 15 and later.
+A LightWeight IOS 15 Clock inspirated by IOS 26-27.
 
 ## Features
 
 ### Nightstand
 
-Customizable full-screen clock with red mode and optional seconds.
+Nightstand mode inspirated from ios 18 nightstand mode.
 
 ![Nightstand clock](Docs/Screenshoots/NS.png)
 ![Nightstand red mode](Docs/Screenshoots/NS2.png)
 
 ### Alarms
 
-Create alarms with the system notification sound. In-app ringing is available
-while the app is open.
+Simple Alarms, with the defauld ios notification sound.
 
 ![Alarm screen](Docs/Screenshoots/Alarm.png)
 
 ### Stopwatch
 
-Start, stop, record laps, and compare the fastest and slowest laps.
+Stopwatch. just how you like it.
 
 ![Stopwatch screen](Docs/Screenshoots/Stopwatch.png)
 ![Stopwatch laps](Docs/Screenshoots/Stopwatch2.png)
 
 ### World Clock
 
-See local times and day differences for cities around the world.
+Drift around the world, Just only in time.
 
 ![World Clock screen](Docs/Screenshoots/WorldClock.png)
 
-### Timer
-
-The timer screen is planned.
-
-![Timer coming soon](Docs/Screenshoots/IMG_0332.png)
 
 ### Personalization
 
-Choose a theme, accent color, glass transparency, and haptic feedback.
+Personalize your app, Your way! Supports Accent Colours and Haptic Feadbacks (Only Works on Phones With Taptic Engine!)
 
 ![Personalization settings](Docs/Screenshoots/Personalisation.png)
 
-### Add a feature and screenshot
 
-Copy this template into the feature list, replace the description and image
-path, and add the screenshot under `Docs/Screenshoots/`:
-
-```markdown
-### Feature name
-
-One-sentence feature description.
-
-![Feature name](Docs/Screenshoots/feature-name.png)
-```
 
 ## iOS 15 build
 
