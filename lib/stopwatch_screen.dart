@@ -137,10 +137,9 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                       _formatTime(elapsed),
                       style: const TextStyle(
                         color: CupertinoColors.white,
-                        fontFamily: 'Menlo',
-                        fontSize: 64,
+                        fontSize: 88,
                         fontFeatures: [FontFeature.tabularFigures()],
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w200,
                       ),
                     ),
                   ),
@@ -205,7 +204,7 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                       ),
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                       itemCount: _laps.length,
                       separatorBuilder: (context, index) => Container(
                         height: 1,
@@ -262,7 +261,6 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                                     _formatTime(lap.durationMicroseconds),
                                     style: TextStyle(
                                       color: lapColor,
-                                      fontFamily: 'Menlo',
                                       fontFeatures: const [
                                         FontFeature.tabularFigures(),
                                       ],

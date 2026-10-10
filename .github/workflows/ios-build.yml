@@ -32,10 +32,15 @@ jobs:
       - name: Generate iOS project
         run: flutter create --platforms=ios --no-pub .
 
-      - name: Set iOS 15 deployment target
+      - name: Set iOS 15 deployment target, app name, and icon
         run: |
+          mkdir -p ios/Runner/Assets.xcassets/AppIcon.appiconset
+          sips -s format png -z 1024 1024 AppIcon.jpg \
+            --out ios/Runner/Assets.xcassets/AppIcon.appiconset/AppIcon.png
           python3 - <<'PY'
           from pathlib import Path
+          import json
+          import plistlib
           import re
 
           project = Path("ios/Runner.xcodeproj/project.pbxproj")
@@ -47,6 +52,24 @@ jobs:
           if project_count == 0:
               raise SystemExit("Could not find the iOS deployment target in the Xcode project")
           project.write_text(project_text)
+
+          icon_set = Path("ios/Runner/Assets.xcassets/AppIcon.appiconset")
+          contents_path = icon_set / "Contents.json"
+          contents = json.loads(contents_path.read_text())
+          contents["images"] = [{
+              "filename": "AppIcon.png",
+              "idiom": "universal",
+              "platform": "ios",
+              "size": "1024x1024",
+          }]
+          contents_path.write_text(json.dumps(contents, indent=2) + "\n")
+
+          info_plist = Path("ios/Runner/Info.plist")
+          with info_plist.open("rb") as source:
+              info = plistlib.load(source)
+          info["CFBundleDisplayName"] = "Clock*"
+          with info_plist.open("wb") as destination:
+              plistlib.dump(info, destination)
           PY
 
       - name: Build for iPhone SE (1st generation)

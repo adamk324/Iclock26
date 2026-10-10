@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 
-import 'stopwatch_screen.dart';
+import 'clock_home.dart';
 
 void main() {
-  runApp(const StopwatchApp());
+  runApp(const ClockApp());
 }
 
-class StopwatchApp extends StatelessWidget {
-  const StopwatchApp({super.key});
+class ClockApp extends StatelessWidget {
+  const ClockApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +15,10 @@ class StopwatchApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: CupertinoThemeData(
         brightness: Brightness.dark,
-        primaryColor: CupertinoColors.systemGreen,
+        primaryColor: CupertinoColors.systemOrange,
         scaffoldBackgroundColor: CupertinoColors.black,
       ),
-      home: StopwatchScreen(),
+      home: ClockHome(),
     );
   }
 }
