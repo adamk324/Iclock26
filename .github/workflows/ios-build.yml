@@ -26,6 +26,9 @@ jobs:
       - name: Fetch Flutter dependencies
         run: flutter pub get
 
+      - name: Analyze Dart code
+        run: flutter analyze
+
       - name: Generate iOS project
         run: flutter create --platforms=ios --no-pub .
 
@@ -45,9 +48,6 @@ jobs:
               raise SystemExit("Could not find the iOS deployment target in the Xcode project")
           project.write_text(project_text)
           PY
-
-      - name: Analyze Dart code
-        run: flutter analyze
 
       - name: Build for iPhone SE (1st generation)
         run: flutter build ios --release --no-codesign --target-platform=ios-arm64

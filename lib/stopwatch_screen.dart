@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show FontFeature;
 
 import 'package:flutter/cupertino.dart';
 
@@ -78,7 +77,8 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
 
   String _formatTime(int microseconds) {
     // Truncate to hundredths to match the Clock app's displayed precision.
-    final int centiseconds = microseconds ~/ Duration.microsecondsPerMillisecond ~/ 10;
+    final int centiseconds =
+        microseconds ~/ Duration.microsecondsPerMillisecond ~/ 10;
     final int minutes = centiseconds ~/ 6000;
     final int seconds = (centiseconds ~/ 100) % 60;
     final int hundredths = centiseconds % 100;
@@ -326,7 +326,8 @@ class _StopwatchButton extends StatelessWidget {
             ),
           ),
         ),
-      ), minimumSize: Size(84, 84),
+      ),
+      minimumSize: Size(84, 84),
     );
   }
 }
