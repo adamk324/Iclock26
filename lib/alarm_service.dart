@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as timezone_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -63,8 +63,6 @@ class AlarmService {
 
   static const String _alarmsKey = 'clockAlarms';
   static const String _nextIdKey = 'nextClockAlarmId';
-  static const MethodChannel _timeZoneChannel =
-      MethodChannel('clock/local_timezone');
 
   final SharedPreferences _preferences;
   final FlutterLocalNotificationsPlugin _notifications =
@@ -77,12 +75,8 @@ class AlarmService {
     SharedPreferences preferences,
   ) async {
     timezone_data.initializeTimeZones();
-    final String? timeZoneName =
-        await _timeZoneChannel.invokeMethod<String>('getLocalTimeZone');
-    if (timeZoneName == null || timeZoneName.isEmpty) {
-      throw StateError('The device did not provide its local time zone.');
-    }
-    tz.setLocalLocation(tz.getLocation(timeZoneName));
+    final TimezoneInfo timeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZone.identifier));
 
     final AlarmService service = AlarmService._(preferences);
     final bool? initialized = await service._notifications.initialize(
