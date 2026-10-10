@@ -29,13 +29,6 @@ jobs:
       - name: Analyze Dart code
         run: flutter analyze
 
-      - name: Generate iOS project
-        run: |
-          mv ios/Runner/AppDelegate.swift "$RUNNER_TEMP/AppDelegate.swift"
-          rmdir ios/Runner ios
-          flutter create --platforms=ios --no-pub .
-          cp "$RUNNER_TEMP/AppDelegate.swift" ios/Runner/AppDelegate.swift
-
       - name: Generate iOS app icons
         run: dart run flutter_launcher_icons
 
