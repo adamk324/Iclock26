@@ -44,18 +44,6 @@ jobs:
           if project_count == 0:
               raise SystemExit("Could not find the iOS deployment target in the Xcode project")
           project.write_text(project_text)
-
-          podfile = Path("ios/Podfile")
-          podfile_text = podfile.read_text()
-          updated_podfile, podfile_count = re.subn(
-              r"(?m)^\s*#?\s*platform :ios, ['\"][^'\"]+['\"]",
-              "platform :ios, '15.0'",
-              podfile_text,
-              count=1,
-          )
-          if podfile_count == 0:
-              updated_podfile = "platform :ios, '15.0'\n" + podfile_text
-          podfile.write_text(updated_podfile)
           PY
 
       - name: Analyze Dart code
