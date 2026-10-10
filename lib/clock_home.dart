@@ -19,6 +19,7 @@ class _ClockHomeState extends State<ClockHome> {
   ];
 
   int _currentIndex = 2;
+  bool _settingsSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +29,13 @@ class _ClockHomeState extends State<ClockHome> {
       child: Stack(
         children: [
           IndexedStack(
-            index: _currentIndex,
+            index: _settingsSelected ? 4 : _currentIndex,
             children: const [
               _ComingSoonScreen(title: 'World Clock'),
               _ComingSoonScreen(title: 'Alarm'),
               StopwatchScreen(),
               _ComingSoonScreen(title: 'Timer'),
+              _ComingSoonScreen(title: 'Settings'),
             ],
           ),
           Positioned(
@@ -43,7 +45,16 @@ class _ClockHomeState extends State<ClockHome> {
             child: GlassTabBar(
               items: _items,
               currentIndex: _currentIndex,
-              onChanged: (index) => setState(() => _currentIndex = index),
+              settingsSelected: _settingsSelected,
+              onChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                  _settingsSelected = false;
+                });
+              },
+              onSettingsPressed: () {
+                setState(() => _settingsSelected = true);
+              },
             ),
           ),
         ],
