@@ -26,6 +26,12 @@ jobs:
       - name: Fetch Flutter dependencies
         run: flutter pub get
 
+      - name: Generate iOS project files
+        run: |
+          cp ios/Runner/AppDelegate.swift "$RUNNER_TEMP/AppDelegate.swift"
+          flutter create --platforms=ios --no-pub .
+          cp "$RUNNER_TEMP/AppDelegate.swift" ios/Runner/AppDelegate.swift
+
       - name: Analyze Dart code
         run: flutter analyze
 
@@ -69,6 +75,9 @@ jobs:
           with info_plist.open("wb") as destination:
               plistlib.dump(info, destination)
           PY
+
+      - name: Generate iOS app icons
+        run: dart run flutter_launcher_icons
 
       - name: Build for iPhone SE (1st generation)
         run: flutter build ios --release --no-codesign
