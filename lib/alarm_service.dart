@@ -58,28 +58,61 @@ class AlarmPermissionDenied implements Exception {
   String toString() => 'Notification permission was not granted.';
 }
 
+class AlarmUnavailable implements Exception {
+  const AlarmUnavailable(this.reason);
+
+  final Object reason;
+
+  @override
+  String toString() => 'Alarms are unavailable on this device: $reason';
+}
+
 class AlarmService {
   AlarmService._(this._preferences);
+
+  AlarmService.unavailable(Object error)
+      : _preferences = null,
+        _initError = error;
 
   static const String _alarmsKey = 'clockAlarms';
   static const String _nextIdKey = 'nextClockAlarmId';
 
-  final SharedPreferences _preferences;
+  final SharedPreferences? _preferences;
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
   final List<ClockAlarm> _alarms = [];
+  Object? _initError;
 
   List<ClockAlarm> get alarms => List<ClockAlarm>.unmodifiable(_alarms);
+
+  /// Why alarms cannot be scheduled, or null when everything is ready.
+  Object? get initError => _initError;
 
   static Future<AlarmService> initialize(
     SharedPreferences preferences,
   ) async {
-    timezone_data.initializeTimeZones();
+    final AlarmService service = AlarmService._(preferences);
+    try {
+      timezone_data.initializeTimeZones();
+      await service._initializePlatform();
+    } on Object catch (error) {
+      // Never let a plugin problem block the whole app from starting.
+      service._initError = error;
+    }
+    try {
+      await service._loadAlarms();
+    } on Object catch (error) {
+      service._alarms.clear();
+      service._initError ??= error;
+    }
+    return service;
+  }
+
+  Future<void> _initializePlatform() async {
     final TimezoneInfo timeZone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZone.identifier));
 
-    final AlarmService service = AlarmService._(preferences);
-    final bool? initialized = await service._notifications.initialize(
+    final bool? initialized = await _notifications.initialize(
       settings: const InitializationSettings(
         iOS: DarwinInitializationSettings(
           requestAlertPermission: false,
@@ -91,12 +124,12 @@ class AlarmService {
     if (initialized != true) {
       throw StateError('Could not initialize local notifications.');
     }
-    await service._loadAlarms();
-    return service;
   }
 
   Future<void> _loadAlarms() async {
-    final String? json = _preferences.getString(_alarmsKey);
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) return;
+    final String? json = preferences.getString(_alarmsKey);
     if (json == null) return;
     final List<dynamic> decoded = jsonDecode(json) as List<dynamic>;
     _alarms
@@ -109,7 +142,12 @@ class AlarmService {
   }
 
   Future<void> _saveAlarms() async {
-    final bool saved = await _preferences.setString(
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) {
+      throw AlarmUnavailable(
+          _initError ?? StateError('Preferences unavailable'));
+    }
+    final bool saved = await preferences.setString(
       _alarmsKey,
       jsonEncode(_alarms.map((alarm) => alarm.toJson()).toList()),
     );
@@ -125,7 +163,12 @@ class AlarmService {
     final bool permissionGranted = await _requestPermission();
     if (!permissionGranted) throw const AlarmPermissionDenied();
 
-    final int id = _preferences.getInt(_nextIdKey) ?? 1;
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) {
+      throw AlarmUnavailable(
+          _initError ?? StateError('Preferences unavailable'));
+    }
+    final int id = preferences.getInt(_nextIdKey) ?? 1;
     final ClockAlarm alarm = ClockAlarm(
       id: id,
       hour: hour,
@@ -139,7 +182,7 @@ class AlarmService {
     _alarms.add(alarm);
     try {
       await _saveAlarms();
-      final bool saved = await _preferences.setInt(_nextIdKey, id + 1);
+      final bool saved = await preferences.setInt(_nextIdKey, id + 1);
       if (!saved) throw StateError('Could not save the next alarm identifier.');
     } on Exception {
       _alarms.removeWhere((existing) => existing.id == id);
@@ -190,6 +233,8 @@ class AlarmService {
   }
 
   Future<bool> _requestPermission() async {
+    final Object? initError = _initError;
+    if (initError != null) throw AlarmUnavailable(initError);
     final IOSFlutterLocalNotificationsPlugin? iosNotifications =
         _notifications.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();

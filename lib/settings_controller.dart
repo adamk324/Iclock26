@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsController extends ChangeNotifier {
   SettingsController._({
-    required SharedPreferences preferences,
+    required SharedPreferences? preferences,
     required bool glassTransparencyEnabled,
     required double transparencyAmount,
     required bool vibrationEnabled,
@@ -18,19 +18,30 @@ class SettingsController extends ChangeNotifier {
   static const String _transparencyAmountKey = 'transparencyAmount';
   static const String _vibrationKey = 'vibrationEnabled';
 
-  final SharedPreferences _preferences;
+  final SharedPreferences? _preferences;
   bool _glassTransparencyEnabled;
   double _transparencyAmount;
   bool _vibrationEnabled;
 
-  static Future<SettingsController> load() async {
-    final SharedPreferences preferences = await SharedPreferences.getInstance();
+  static SettingsController defaults() => SettingsController._(
+        preferences: null,
+        glassTransparencyEnabled: true,
+        transparencyAmount: 0.75,
+        vibrationEnabled: true,
+      );
+
+  static Future<SettingsController> load({
+    SharedPreferences? preferences,
+  }) async {
+    final SharedPreferences loadedPreferences =
+        preferences ?? await SharedPreferences.getInstance();
     return SettingsController._(
-      preferences: preferences,
+      preferences: loadedPreferences,
       glassTransparencyEnabled:
-          preferences.getBool(_glassTransparencyKey) ?? true,
-      transparencyAmount: preferences.getDouble(_transparencyAmountKey) ?? 0.75,
-      vibrationEnabled: preferences.getBool(_vibrationKey) ?? true,
+          loadedPreferences.getBool(_glassTransparencyKey) ?? true,
+      transparencyAmount:
+          loadedPreferences.getDouble(_transparencyAmountKey) ?? 0.75,
+      vibrationEnabled: loadedPreferences.getBool(_vibrationKey) ?? true,
     );
   }
 
@@ -50,8 +61,10 @@ class SettingsController extends ChangeNotifier {
     if (_glassTransparencyEnabled == value) return;
     _glassTransparencyEnabled = value;
     notifyListeners();
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) return;
     unawaited(_save(
-      _preferences.setBool(_glassTransparencyKey, value),
+      preferences.setBool(_glassTransparencyKey, value),
       _glassTransparencyKey,
     ));
   }
@@ -61,8 +74,10 @@ class SettingsController extends ChangeNotifier {
     if (_transparencyAmount == amount) return;
     _transparencyAmount = amount;
     notifyListeners();
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) return;
     unawaited(_save(
-      _preferences.setDouble(_transparencyAmountKey, amount),
+      preferences.setDouble(_transparencyAmountKey, amount),
       _transparencyAmountKey,
     ));
   }
@@ -71,8 +86,10 @@ class SettingsController extends ChangeNotifier {
     if (_vibrationEnabled == value) return;
     _vibrationEnabled = value;
     notifyListeners();
+    final SharedPreferences? preferences = _preferences;
+    if (preferences == null) return;
     unawaited(_save(
-      _preferences.setBool(_vibrationKey, value),
+      preferences.setBool(_vibrationKey, value),
       _vibrationKey,
     ));
   }
