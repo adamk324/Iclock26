@@ -50,7 +50,7 @@ jobs:
           PY
 
       - name: Build for iPhone SE (1st generation)
-        run: flutter build ios --release --no-codesign --target-platform=ios-arm64
+        run: flutter build ios --release --no-codesign
 
       - name: Upload unsigned iOS app
         uses: actions/upload-artifact@v4
