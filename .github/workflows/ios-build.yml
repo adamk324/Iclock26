@@ -79,7 +79,7 @@ jobs:
       - name: Generate iOS app icons
         run: dart run flutter_launcher_icons
 
-      - name: Build for iPhone SE (1st generation)
+      - name: Build for iOS 15
         run: flutter build ios --release --no-codesign
 
       - name: Package app as IPA
@@ -87,12 +87,12 @@ jobs:
           mkdir -p build/ios/ipa/Payload
           cp -R build/ios/iphoneos/Runner.app build/ios/ipa/Payload/Runner.app
           cd build/ios/ipa
-          /usr/bin/zip -qr Runner.ipa Payload
+          /usr/bin/zip -qr Clock.ipa Payload
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-15-iphone-se-unsigned-ipa
-          path: build/ios/ipa/Runner.ipa
+          name: ios-15-unsigned-ipa
+          path: build/ios/ipa/Clock.ipa
           if-no-files-found: error
           retention-days: 7
