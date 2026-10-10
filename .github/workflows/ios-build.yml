@@ -1,0 +1,73 @@
+name: iOS build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Fetch Flutter dependencies
+        run: flutter pub get
+
+      - name: Generate iOS project
+        run: flutter create --platforms=ios --no-pub .
+
+      - name: Set iOS 15 deployment target
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          project = Path("ios/Runner.xcodeproj/project.pbxproj")
+          project_text, project_count = re.subn(
+              r"(IPHONEOS_DEPLOYMENT_TARGET\s*=\s*)[0-9.]+;",
+              r"\g<1>15.0;",
+              project.read_text(),
+          )
+          if project_count == 0:
+              raise SystemExit("Could not find the iOS deployment target in the Xcode project")
+          project.write_text(project_text)
+
+          podfile = Path("ios/Podfile")
+          podfile_text = podfile.read_text()
+          updated_podfile, podfile_count = re.subn(
+              r"(?m)^\s*#?\s*platform :ios, ['\"][^'\"]+['\"]",
+              "platform :ios, '15.0'",
+              podfile_text,
+              count=1,
+          )
+          if podfile_count == 0:
+              updated_podfile = "platform :ios, '15.0'\n" + podfile_text
+          podfile.write_text(updated_podfile)
+          PY
+
+      - name: Analyze Dart code
+        run: flutter analyze
+
+      - name: Build for iPhone SE (1st generation)
+        run: flutter build ios --release --no-codesign --target-platform=ios-arm64
+
+      - name: Upload unsigned iOS app
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-15-iphone-se-unsigned
+          path: build/ios/iphoneos/Runner.app
+          if-no-files-found: error
+          retention-days: 7
