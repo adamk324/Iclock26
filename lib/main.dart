@@ -151,43 +151,58 @@ class ClockApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      debugShowCheckedModeBanner: false,
-      theme: _clockTheme,
-      home: ValueListenableBuilder<List<String>>(
-        valueListenable: _startupErrors,
-        builder: (context, errors, child) => Stack(
-          children: [
-            ClockHome(
-              controller: controller,
-              alarmService: alarmService,
-            ),
-            if (errors.isNotEmpty)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  bottom: false,
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 120),
-                    color: CupertinoColors.black,
-                    padding: const EdgeInsets.all(12),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        errors.join('\n'),
-                        style: const TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 12,
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        final Brightness? brightness = switch (controller.themeMode) {
+          ClockThemeMode.system => null,
+          ClockThemeMode.light => Brightness.light,
+          ClockThemeMode.dark => Brightness.dark,
+        };
+        return CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          theme: CupertinoThemeData(
+            brightness: brightness,
+            primaryColor: controller.accentColor,
+            scaffoldBackgroundColor:
+                brightness == Brightness.light ? const Color(0xFFF2F2F7) : null,
+          ),
+          home: ValueListenableBuilder<List<String>>(
+            valueListenable: _startupErrors,
+            builder: (context, errors, child) => Stack(
+              children: [
+                ClockHome(
+                  controller: controller,
+                  alarmService: alarmService,
+                ),
+                if (errors.isNotEmpty)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      bottom: false,
+                      child: Container(
+                        constraints: const BoxConstraints(maxHeight: 120),
+                        color: CupertinoColors.black,
+                        padding: const EdgeInsets.all(12),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            errors.join('\n'),
+                            style: const TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

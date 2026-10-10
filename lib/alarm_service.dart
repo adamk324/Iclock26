@@ -82,11 +82,13 @@ class AlarmService {
       FlutterLocalNotificationsPlugin();
   final List<ClockAlarm> _alarms = [];
   Object? _initError;
+  String? _initWarning;
 
   List<ClockAlarm> get alarms => List<ClockAlarm>.unmodifiable(_alarms);
 
   /// Why alarms cannot be scheduled, or null when everything is ready.
   Object? get initError => _initError;
+  String? get initWarning => _initWarning;
 
   static Future<AlarmService> initialize(
     SharedPreferences preferences,
@@ -122,7 +124,7 @@ class AlarmService {
       ),
     );
     if (initialized != true) {
-      throw StateError('Could not initialize local notifications.');
+      _initWarning = 'initialize() returned $initialized';
     }
   }
 
@@ -247,6 +249,92 @@ class AlarmService {
           sound: true,
         ) ??
         false;
+  }
+
+  Future<void> scheduleTestNotification() async {
+    final Object? initError = _initError;
+    if (initError != null) throw AlarmUnavailable(initError);
+    if (!await _requestPermission()) throw const AlarmPermissionDenied();
+
+    await _notifications.zonedSchedule(
+      id: 2147483646,
+      title: 'Clock* test notification',
+      body: 'Your notification test is working.',
+      scheduledDate: tz.TZDateTime.now(tz.local).add(
+        const Duration(seconds: 5),
+      ),
+      notificationDetails: const NotificationDetails(
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  ClockAlarm? alarmDueAt(DateTime time) {
+    final List<ClockAlarm> due = alarmsDueAt(time);
+    return due.isEmpty ? null : due.first;
+  }
+
+  List<ClockAlarm> alarmsDueAt(DateTime time) {
+    final int weekday = time.weekday;
+    return _alarms
+        .where(
+          (alarm) =>
+              alarm.enabled &&
+              alarm.hour == time.hour &&
+              alarm.minute == time.minute &&
+              (alarm.weekdays.isEmpty || alarm.weekdays.contains(weekday)),
+        )
+        .toList(growable: false);
+  }
+
+  DateTime? nextAlarmDateTime(DateTime now) {
+    DateTime? next;
+    for (final ClockAlarm alarm in _alarms) {
+      if (!alarm.enabled) continue;
+      DateTime candidate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        alarm.hour,
+        alarm.minute,
+      );
+      if (alarm.weekdays.isEmpty) {
+        if (!candidate.isAfter(now)) {
+          candidate = DateTime(
+            now.year,
+            now.month,
+            now.day + 1,
+            alarm.hour,
+            alarm.minute,
+          );
+        }
+      } else {
+        int daysAhead = 7;
+        for (final int weekday in alarm.weekdays) {
+          final int difference = (weekday - now.weekday + 7) % 7;
+          if (difference < daysAhead) daysAhead = difference;
+        }
+        candidate = DateTime(
+          now.year,
+          now.month,
+          now.day + daysAhead,
+          alarm.hour,
+          alarm.minute,
+        );
+        if (!candidate.isAfter(now)) {
+          candidate = DateTime(
+            candidate.year,
+            candidate.month,
+            candidate.day + 7,
+            alarm.hour,
+            alarm.minute,
+          );
+        }
+      }
+      if (next == null || candidate.isBefore(next)) next = candidate;
+    }
+    return next;
   }
 
   Future<void> _schedule(ClockAlarm alarm) async {

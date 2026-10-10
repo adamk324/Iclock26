@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import 'app_colors.dart';
+
 class GlassTabBarItem {
   const GlassTabBarItem({
     required this.icon,
@@ -110,6 +112,13 @@ class _GlassTabBarState extends State<GlassTabBar> {
               builder: (context, constraints) {
                 final double tabWidth =
                     (constraints.maxWidth - _inset * 2) / widget.items.length;
+                final AppColors colors = AppColors.of(context);
+                final Color glassFill = Color.fromARGB(
+                  widget.fillAlpha,
+                  (colors.glassFillBase.r * 255).round(),
+                  (colors.glassFillBase.g * 255).round(),
+                  (colors.glassFillBase.b * 255).round(),
+                );
 
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -128,15 +137,10 @@ class _GlassTabBarState extends State<GlassTabBar> {
                       filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(
-                            widget.fillAlpha,
-                            0x26,
-                            0x26,
-                            0x28,
-                          ),
+                          color: glassFill,
                           borderRadius: BorderRadius.circular(_radius),
                           border: Border.all(
-                            color: const Color(0x33FFFFFF),
+                            color: colors.glassBorderBase,
                             width: 1,
                           ),
                         ),
@@ -152,7 +156,7 @@ class _GlassTabBarState extends State<GlassTabBar> {
                                 width: tabWidth,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: const Color(0x2EFFFFFF),
+                                    color: colors.glassSelection,
                                     borderRadius: BorderRadius.circular(22),
                                   ),
                                 ),
@@ -209,6 +213,13 @@ class _GlassSettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors colors = AppColors.of(context);
+    final Color glassFill = Color.fromARGB(
+      fillAlpha,
+      (colors.glassFillBase.r * 255).round(),
+      (colors.glassFillBase.g * 255).round(),
+      (colors.glassFillBase.b * 255).round(),
+    );
     return SizedBox(
       width: 52,
       height: 52,
@@ -218,7 +229,7 @@ class _GlassSettingsButton extends StatelessWidget {
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: onPressed,
-            color: Color.fromARGB(fillAlpha, 0x26, 0x26, 0x28),
+            color: glassFill,
             borderRadius: BorderRadius.circular(26),
             child: Container(
               width: 52,
@@ -226,7 +237,7 @@ class _GlassSettingsButton extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0x33FFFFFF),
+                  color: colors.glassBorderBase,
                   width: 1,
                 ),
               ),
@@ -235,8 +246,8 @@ class _GlassSettingsButton extends StatelessWidget {
                 CupertinoIcons.settings,
                 size: 22,
                 color: selected
-                    ? CupertinoColors.systemOrange
-                    : CupertinoColors.systemGrey,
+                    ? CupertinoTheme.of(context).primaryColor
+                    : colors.secondaryText,
               ),
             ),
           ),
@@ -259,8 +270,9 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color =
-        selected ? CupertinoColors.systemOrange : CupertinoColors.systemGrey;
+    final Color color = selected
+        ? CupertinoTheme.of(context).primaryColor
+        : AppColors.of(context).secondaryText;
 
     return Semantics(
       button: true,

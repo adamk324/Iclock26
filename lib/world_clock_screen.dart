@@ -6,8 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import 'app_colors.dart';
+
 class WorldClockScreen extends StatefulWidget {
-  const WorldClockScreen({super.key});
+  const WorldClockScreen({
+    required this.onOpenNightstand,
+    super.key,
+  });
+
+  final VoidCallback onOpenNightstand;
 
   @override
   State<WorldClockScreen> createState() => _WorldClockScreenState();
@@ -131,13 +138,24 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('World Clock'),
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: AppColors.of(context).background,
         border: null,
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(32, 32),
-          onPressed: _addCity,
-          child: const Icon(CupertinoIcons.add, size: 25),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(32, 32),
+              onPressed: widget.onOpenNightstand,
+              child: const Icon(CupertinoIcons.moon_stars, size: 23),
+            ),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(32, 32),
+              onPressed: _addCity,
+              child: const Icon(CupertinoIcons.add, size: 25),
+            ),
+          ],
         ),
       ),
       child: SafeArea(
@@ -149,17 +167,19 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                   child: Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: CupertinoColors.systemRed),
+                    style: TextStyle(color: AppColors.of(context).danger),
                   ),
                 ),
               )
             : !_loaded
                 ? const Center(child: CupertinoActivityIndicator())
                 : _cities.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
                           'Add a city to see its local time.',
-                          style: TextStyle(color: CupertinoColors.systemGrey),
+                          style: TextStyle(
+                            color: AppColors.of(context).secondaryText,
+                          ),
                         ),
                       )
                     : ListView.builder(
@@ -174,10 +194,10 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                             background: Container(
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.only(right: 24),
-                              color: CupertinoColors.systemRed,
-                              child: const Icon(
+                              color: AppColors.of(context).danger,
+                              child: Icon(
                                 CupertinoIcons.delete,
-                                color: CupertinoColors.white,
+                                color: AppColors.of(context).primaryText,
                               ),
                             ),
                             child: _CityRow(city: city, now: _now),
@@ -209,8 +229,10 @@ class _CityRow extends StatelessWidget {
     return Container(
       height: 100,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF38383A))),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.of(context).separator),
+        ),
       ),
       child: Row(
         children: [
@@ -221,16 +243,16 @@ class _CityRow extends StatelessWidget {
               children: [
                 Text(
                   city.name,
-                  style: const TextStyle(
-                    color: CupertinoColors.white,
+                  style: TextStyle(
+                    color: AppColors.of(context).primaryText,
                     fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '$relativeDate, $difference',
-                  style: const TextStyle(
-                    color: CupertinoColors.systemGrey,
+                  style: TextStyle(
+                    color: AppColors.of(context).secondaryText,
                     fontSize: 13,
                   ),
                 ),
@@ -250,8 +272,8 @@ class _CityRow extends StatelessWidget {
               final String second = time.second.toString().padLeft(2, '0');
               return Text(
                 '$hour:$minute:$second ${time.hour < 12 ? 'AM' : 'PM'}',
-                style: const TextStyle(
-                  color: CupertinoColors.white,
+                style: TextStyle(
+                  color: AppColors.of(context).primaryText,
                   fontSize: 31,
                   fontFeatures: [FontFeature.tabularFigures()],
                   fontWeight: FontWeight.w200,
@@ -320,10 +342,10 @@ class _CitySearchScreenState extends State<_CitySearchScreen> {
         .toList();
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Add City'),
         previousPageTitle: 'World Clock',
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: AppColors.of(context).background,
         border: null,
       ),
       child: SafeArea(
@@ -345,8 +367,8 @@ class _CitySearchScreenState extends State<_CitySearchScreen> {
                     title: Text(city.name),
                     additionalInfo: Text(
                       city.timeZone,
-                      style: const TextStyle(
-                        color: CupertinoColors.systemGrey,
+                      style: TextStyle(
+                        color: AppColors.of(context).secondaryText,
                         fontSize: 11,
                       ),
                     ),

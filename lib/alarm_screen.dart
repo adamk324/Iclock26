@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import 'app_colors.dart';
 import 'alarm_service.dart';
 
 class AlarmScreen extends StatefulWidget {
@@ -128,7 +129,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Alarm'),
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: AppColors.of(context).background,
         border: null,
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
@@ -142,30 +143,47 @@ class _AlarmScreenState extends State<AlarmScreen> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 110),
           children: [
+            if (widget.service.initWarning != null ||
+                widget.service.initError != null)
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+                child: Text(
+                  'Notifications unavailable - alarms ring only while the app '
+                  'is open.',
+                  style: TextStyle(
+                    color: AppColors.of(context).secondaryText,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: CupertinoColors.systemRed),
+                  style: TextStyle(color: AppColors.of(context).danger),
                 ),
               ),
             if (alarms.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 64, horizontal: 24),
                 child: Center(
                   child: Text(
                     'No alarms',
-                    style: TextStyle(color: CupertinoColors.systemGrey),
+                    style: TextStyle(
+                      color: AppColors.of(context).secondaryText,
+                    ),
                   ),
                 ),
               ),
             for (final ClockAlarm alarm in alarms)
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 13, 16, 13),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: Color(0xFF38383A)),
+                    bottom: BorderSide(
+                      color: AppColors.of(context).separator,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -181,8 +199,8 @@ class _AlarmScreenState extends State<AlarmScreen> {
                               _formatTime(alarm),
                               style: TextStyle(
                                 color: alarm.enabled
-                                    ? CupertinoColors.white
-                                    : CupertinoColors.systemGrey,
+                                    ? AppColors.of(context).primaryText
+                                    : AppColors.of(context).secondaryText,
                                 fontSize: 38,
                                 fontWeight: FontWeight.w200,
                                 fontFeatures: const [
@@ -193,16 +211,16 @@ class _AlarmScreenState extends State<AlarmScreen> {
                             const SizedBox(height: 3),
                             Text(
                               alarm.label.isEmpty ? 'Alarm' : alarm.label,
-                              style: const TextStyle(
-                                color: CupertinoColors.systemGrey,
+                              style: TextStyle(
+                                color: AppColors.of(context).secondaryText,
                                 fontSize: 14,
                               ),
                             ),
                             const SizedBox(height: 3),
                             Text(
                               _repeatLabel(alarm),
-                              style: const TextStyle(
-                                color: CupertinoColors.systemGrey2,
+                              style: TextStyle(
+                                color: AppColors.of(context).secondaryText,
                                 fontSize: 13,
                               ),
                             ),
@@ -218,22 +236,22 @@ class _AlarmScreenState extends State<AlarmScreen> {
                       padding: const EdgeInsets.only(left: 8),
                       minimumSize: const Size(32, 32),
                       onPressed: () => _deleteAlarm(alarm),
-                      child: const Icon(
+                      child: Icon(
                         CupertinoIcons.delete,
-                        color: CupertinoColors.systemGrey,
+                        color: AppColors.of(context).secondaryText,
                         size: 19,
                       ),
                     ),
                   ],
                 ),
               ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 12),
               child: Text(
                 'Alarms use notifications, so they may not ring in silent mode '
                 'or Do Not Disturb.',
                 style: TextStyle(
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.of(context).secondaryText,
                   fontSize: 13,
                 ),
               ),
@@ -300,8 +318,8 @@ class _AlarmEditorSheetState extends State<_AlarmEditorSheet> {
     final double sheetHeight = MediaQuery.sizeOf(context).height * 0.88;
     return Container(
       height: sheetHeight,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1C1C1E),
+      decoration: BoxDecoration(
+        color: AppColors.of(context).background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
@@ -355,7 +373,7 @@ class _AlarmEditorSheetState extends State<_AlarmEditorSheet> {
                         clearButtonMode: OverlayVisibilityMode.editing,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2C2C2E),
+                          color: AppColors.of(context).secondaryButton,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -365,10 +383,10 @@ class _AlarmEditorSheetState extends State<_AlarmEditorSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Repeat',
                             style: TextStyle(
-                              color: CupertinoColors.systemGrey,
+                              color: AppColors.of(context).secondaryText,
                               fontSize: 14,
                             ),
                           ),
@@ -429,13 +447,16 @@ class _WeekdayButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color:
-              selected ? CupertinoColors.systemOrange : const Color(0xFF3A3A3C),
+          color: selected
+              ? CupertinoTheme.of(context).primaryColor
+              : AppColors.of(context).separator,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? CupertinoColors.black : CupertinoColors.white,
+            color: selected
+                ? AppColors.of(context).background
+                : AppColors.of(context).primaryText,
             fontWeight: FontWeight.w600,
           ),
         ),

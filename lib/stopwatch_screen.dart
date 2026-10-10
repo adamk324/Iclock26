@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 
+import 'app_colors.dart';
+
 class StopwatchScreen extends StatefulWidget {
   const StopwatchScreen({super.key});
 
@@ -115,9 +117,9 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Stopwatch'),
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: AppColors.of(context).background,
         border: null,
       ),
       child: SafeArea(
@@ -135,8 +137,8 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                     valueListenable: _elapsedMicroseconds,
                     builder: (context, elapsed, child) => Text(
                       _formatTime(elapsed),
-                      style: const TextStyle(
-                        color: CupertinoColors.white,
+                      style: TextStyle(
+                        color: AppColors.of(context).primaryText,
                         fontSize: 88,
                         fontFeatures: [FontFeature.tabularFigures()],
                         fontWeight: FontWeight.w200,
@@ -154,41 +156,41 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                 children: [
                   _StopwatchButton(
                     label: _isRunning ? 'Lap' : 'Reset',
-                    color: const Color(0xFF333336),
-                    foregroundColor: CupertinoColors.white,
+                    color: AppColors.of(context).secondaryButton,
+                    foregroundColor: AppColors.of(context).primaryText,
                     onPressed: _handleSecondaryAction,
                   ),
                   _StopwatchButton(
                     label: _isRunning ? 'Stop' : 'Start',
                     color: _isRunning
-                        ? const Color(0xFF3A1717)
-                        : const Color(0xFF173A20),
+                        ? AppColors.of(context).dangerButtonFill
+                        : AppColors.of(context).successButtonFill,
                     foregroundColor: _isRunning
-                        ? CupertinoColors.systemRed
-                        : CupertinoColors.systemGreen,
+                        ? AppColors.of(context).danger
+                        : AppColors.of(context).success,
                     onPressed: _isRunning ? _stopStopwatch : _startStopwatch,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 28),
-            Container(height: 1, color: const Color(0xFF38383A)),
+            Container(height: 1, color: AppColors.of(context).separator),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Laps',
                     style: TextStyle(
-                      color: CupertinoColors.systemGrey,
+                      color: AppColors.of(context).secondaryText,
                       fontSize: 14,
                     ),
                   ),
                   Text(
                     '${_laps.length}',
-                    style: const TextStyle(
-                      color: CupertinoColors.systemGrey,
+                    style: TextStyle(
+                      color: AppColors.of(context).secondaryText,
                       fontSize: 14,
                     ),
                   ),
@@ -197,10 +199,12 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
             ),
             Expanded(
               child: _laps.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'No laps yet',
-                        style: TextStyle(color: CupertinoColors.systemGrey),
+                        style: TextStyle(
+                          color: AppColors.of(context).secondaryText,
+                        ),
                       ),
                     )
                   : ListView.separated(
@@ -208,7 +212,7 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                       itemCount: _laps.length,
                       separatorBuilder: (context, index) => Container(
                         height: 1,
-                        color: const Color(0xFF38383A),
+                        color: AppColors.of(context).separator,
                       ),
                       itemBuilder: (context, index) {
                         final int lapIndex = _laps.length - index - 1;
@@ -216,10 +220,10 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                         final bool isFastest = lapIndex == _fastestLapIndex;
                         final bool isSlowest = lapIndex == _slowestLapIndex;
                         final Color lapColor = isFastest
-                            ? CupertinoColors.systemGreen
+                            ? AppColors.of(context).success
                             : isSlowest
-                                ? CupertinoColors.systemRed
-                                : CupertinoColors.white;
+                                ? AppColors.of(context).danger
+                                : AppColors.of(context).primaryText;
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -228,8 +232,8 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                             children: [
                               Text(
                                 'Lap ${lap.number}',
-                                style: const TextStyle(
-                                  color: CupertinoColors.white,
+                                style: TextStyle(
+                                  color: AppColors.of(context).primaryText,
                                   fontSize: 16,
                                 ),
                               ),
@@ -240,8 +244,8 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Text(
                                         'Fastest',
-                                        style: const TextStyle(
-                                          color: CupertinoColors.systemGreen,
+                                        style: TextStyle(
+                                          color: AppColors.of(context).success,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -251,8 +255,8 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Text(
                                         'Slowest',
-                                        style: const TextStyle(
-                                          color: CupertinoColors.systemRed,
+                                        style: TextStyle(
+                                          color: AppColors.of(context).danger,
                                           fontSize: 12,
                                         ),
                                       ),

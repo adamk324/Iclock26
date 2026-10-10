@@ -1,24 +1,32 @@
 import 'package:flutter/cupertino.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_colors.dart';
+import 'alarm_service.dart';
+import 'nightstand_screen.dart';
+import 'personalization_controls.dart';
 import 'settings_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
     required this.controller,
+    required this.onRunSetupAgain,
+    required this.alarmService,
     super.key,
   });
 
   final SettingsController controller;
+  final Future<void> Function() onRunSetupAgain;
+  final AlarmService alarmService;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
+        navigationBar: CupertinoNavigationBar(
           middle: Text('Settings'),
-          backgroundColor: CupertinoColors.black,
+          backgroundColor: AppColors.of(context).background,
           border: null,
         ),
         child: SafeArea(
@@ -28,8 +36,29 @@ class SettingsScreen extends StatelessWidget {
             children: [
               CupertinoListSection.insetGrouped(
                 header: const Text('Appearance'),
-                backgroundColor: CupertinoColors.black,
+                backgroundColor: AppColors.of(context).background,
                 children: [
+                  CupertinoListTile(
+                    title: const Text('Theme'),
+                    trailing: ThemeModePicker(
+                      value: controller.themeMode,
+                      onChanged: controller.setThemeMode,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Accent color'),
+                        const SizedBox(height: 14),
+                        AccentColorPicker(
+                          selectedIndex: controller.accentIndex,
+                          onSelected: controller.setAccentIndex,
+                        ),
+                      ],
+                    ),
+                  ),
                   CupertinoListTile(
                     title: const Text('Glass transparency'),
                     trailing: CupertinoSwitch(
@@ -48,8 +77,8 @@ class SettingsScreen extends StatelessWidget {
                             const Text('Transparency amount'),
                             Text(
                               '${(controller.transparencyAmount * 100).round()}%',
-                              style: const TextStyle(
-                                color: CupertinoColors.systemGrey,
+                              style: TextStyle(
+                                color: AppColors.of(context).secondaryText,
                               ),
                             ),
                           ],
@@ -66,8 +95,35 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               CupertinoListSection.insetGrouped(
+                header: const Text('Alarms'),
+                backgroundColor: AppColors.of(context).background,
+                children: [
+                  CupertinoListTile(
+                    title: const Text('Installation type'),
+                    additionalInfo: Text(_installTypeLabel(controller.installType)),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => _chooseInstallType(context),
+                  ),
+                  CupertinoListTile(
+                    title: const Text('Ring alarms inside the app'),
+                    trailing: CupertinoSwitch(
+                      value: controller.inAppAlarmRing,
+                      onChanged: controller.setInAppAlarmRing,
+                    ),
+                  ),
+                  CupertinoListTile(
+                    title: const Text('Run setup again'),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () async {
+                      controller.resetSetup();
+                      await onRunSetupAgain();
+                    },
+                  ),
+                ],
+              ),
+              CupertinoListSection.insetGrouped(
                 header: const Text('Feedback'),
-                backgroundColor: CupertinoColors.black,
+                backgroundColor: AppColors.of(context).background,
                 children: [
                   CupertinoListTile(
                     title: const Text('Vibration'),
@@ -79,8 +135,26 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               CupertinoListSection.insetGrouped(
+                header: const Text('Nightstand'),
+                backgroundColor: AppColors.of(context).background,
+                children: [
+                  CupertinoListTile(
+                    title: const Text('Nightstand'),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => Navigator.of(context).push<void>(
+                      CupertinoPageRoute<void>(
+                        builder: (context) => NightstandScreen(
+                          controller: controller,
+                          alarmService: alarmService,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              CupertinoListSection.insetGrouped(
                 header: const Text('About'),
-                backgroundColor: CupertinoColors.black,
+                backgroundColor: AppColors.of(context).background,
                 children: [
                   CupertinoListTile(
                     title: const Text('Source code on GitHub'),
@@ -102,6 +176,46 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  String _installTypeLabel(InstallType? type) {
+    switch (type) {
+      case InstallType.trollStore:
+        return 'TrollStore';
+      case InstallType.standard:
+        return 'Normal';
+      case null:
+        return 'Not selected';
+    }
+  }
+
+  Future<void> _chooseInstallType(BuildContext context) {
+    return showCupertinoModalPopup<void>(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('Installation type'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              controller.setInstallType(InstallType.trollStore);
+              Navigator.of(context).pop();
+            },
+            child: const Text('TrollStore'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              controller.setInstallType(InstallType.standard);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Normal (App Store, TestFlight, or sideloaded)'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
         ),
       ),
     );
@@ -153,19 +267,19 @@ class _LegalNoticeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: Text('Legal notice'),
         previousPageTitle: 'Settings',
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: AppColors.of(context).background,
         border: null,
       ),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: const Text(
+          child: Text(
             _notice,
             style: TextStyle(
-              color: CupertinoColors.white,
+              color: AppColors.of(context).primaryText,
               fontSize: 16,
               height: 1.5,
             ),
