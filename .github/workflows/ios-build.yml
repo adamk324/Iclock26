@@ -29,9 +29,6 @@ jobs:
       - name: Analyze Dart code
         run: flutter analyze
 
-      - name: Generate iOS app icons
-        run: dart run flutter_launcher_icons
-
       - name: Set iOS 15 deployment target, app name, and bundle identifiers
         run: |
           python3 - <<'PY'
