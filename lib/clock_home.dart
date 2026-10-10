@@ -1,17 +1,22 @@
 import 'package:flutter/cupertino.dart';
 
+import 'alarm_screen.dart';
+import 'alarm_service.dart';
 import 'glass_tab_bar.dart';
 import 'settings_controller.dart';
 import 'settings_screen.dart';
 import 'stopwatch_screen.dart';
+import 'world_clock_screen.dart';
 
 class ClockHome extends StatefulWidget {
   const ClockHome({
     required this.controller,
+    required this.alarmService,
     super.key,
   });
 
   final SettingsController controller;
+  final AlarmService alarmService;
 
   @override
   State<ClockHome> createState() => _ClockHomeState();
@@ -40,8 +45,8 @@ class _ClockHomeState extends State<ClockHome> {
               IndexedStack(
                 index: _settingsSelected ? 4 : _currentIndex,
                 children: [
-                  const _ComingSoonScreen(title: 'World Clock'),
-                  const _ComingSoonScreen(title: 'Alarm'),
+                  const WorldClockScreen(),
+                  AlarmScreen(service: widget.alarmService),
                   const StopwatchScreen(),
                   const _ComingSoonScreen(title: 'Timer'),
                   SettingsScreen(controller: widget.controller),

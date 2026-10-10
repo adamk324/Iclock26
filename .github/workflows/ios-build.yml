@@ -74,6 +74,39 @@ jobs:
           info["CFBundleDisplayName"] = "Clock*"
           with info_plist.open("wb") as destination:
               plistlib.dump(info, destination)
+
+          app_delegate = Path("ios/Runner/AppDelegate.swift")
+          delegate_text = app_delegate.read_text()
+          registration = "    GeneratedPluginRegistrant.register(with: self)\n"
+          if registration not in delegate_text:
+              raise SystemExit("Could not find plugin registration in AppDelegate.swift")
+          if "clock/local_timezone" not in delegate_text:
+              delegate_text = delegate_text.replace(
+                  registration,
+                  registration
+                  + """    if let controller = window?.rootViewController as? FlutterViewController {
+                    let timeZoneChannel = FlutterMethodChannel(
+                      name: "clock/local_timezone",
+                      binaryMessenger: controller.binaryMessenger
+                    )
+                    timeZoneChannel.setMethodCallHandler { call, result in
+                      guard call.method == "getLocalTimeZone" else {
+                        result(FlutterMethodNotImplemented)
+                        return
+                      }
+                      result(TimeZone.current.identifier)
+                    }
+                  }
+                  UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+                  """,
+                  1,
+              )
+              delegate_text = delegate_text.replace(
+                  "import UIKit\n",
+                  "import UIKit\nimport UserNotifications\n",
+                  1,
+              )
+              app_delegate.write_text(delegate_text)
           PY
 
       - name: Build for iPhone SE (1st generation)
