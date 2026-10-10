@@ -18,7 +18,7 @@ class GlassTabBar extends StatelessWidget {
     required this.currentIndex,
     required this.onChanged,
     super.key,
-  })  : assert(items.isNotEmpty),
+  })  : assert(items.length > 0),
         assert(currentIndex >= 0 && currentIndex < items.length);
 
   final List<GlassTabBarItem> items;
