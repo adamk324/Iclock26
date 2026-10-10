@@ -312,6 +312,7 @@ class _StopwatchButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       borderRadius: BorderRadius.circular(42),
       color: color,
+      minimumSize: const Size(84, 84),
       child: SizedBox(
         width: 84,
         height: 84,
@@ -325,7 +326,6 @@ class _StopwatchButton extends StatelessWidget {
           ),
         ),
       ),
-      minimumSize: Size(84, 84),
     );
   }
 }
