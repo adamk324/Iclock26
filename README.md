@@ -13,7 +13,7 @@ Nightstand mode inspirated from ios 18 nightstand mode.
 
 ### Alarms
 
-Simple Alarms, with the defauld ios notification sound.
+Simple Alarms, with the default ios notification sound.
 
 ![Alarm screen](Docs/Screenshoots/Alarm.png)
 
